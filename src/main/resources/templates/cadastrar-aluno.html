@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <div class="container py-5">
+
+        <h1>Cadastrar Aluno</h1>
+
+        <div class="row mb-2">
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-bold" for="">Nome</label>
+                <input class="form-control" type="text" id="nome">
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-bold" for="">Matrícula</label>
+                <input class="form-control" type="text" id="matricula">
+            </div>
+            
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-bold" for="">Curso</label>
+                <select class="form-select" id="curso">
+                    <option selected disabled>Selecione</option>
+                    <option th:each="curso : ${cursos}" th:value="${curso.idCurso}" th:text="${curso.nome}"></option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row mb-2">
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-bold" for="">Código do Cartão</label>
+                <input class="form-control" type="text" id="codigo-cartao" th:value="${codigo}">
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-12">
+                <label class="form-label fw-bold" for="">Descrição do Cartão</label>
+                <textarea class="form-control" id="descricao-cartao" rows="5"></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <a href="/app/dashboard" class="btn btn-danger ms-2">Cancelar</a>
+            <button class="btn btn-success ms-2" id="btn-salvar">Salvar</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery 3.6.1 -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+    <!-- Sweet Alet 2.1.2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.6/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(document).ready(() => {
+            $('#btn-salvar').on('click', () => {
+                salvar();
+            });
+
+            function salvar(){
+                const nome = $('#nome').val();
+                const matricula = $('#matricula').val();
+                const curso = $('#curso').val();
+                const codigoCartao = $('#codigo-cartao').val();
+                const descricaoCartao = $('#descricao-cartao').val();
+
+                const campos = [nome, matricula, curso, codigoCartao, descricaoCartao];
+
+                if(!camposValidos(campos)){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Preencha todos os campos',
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/alunos',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        'nome': nome,
+                        'matricula': matricula,
+                        'idCurso': curso,
+                        'cartao': {
+                            'codigo': codigoCartao,
+                            'descricao': descricaoCartao
+                        }
+                    }),
+                    success: () => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Aluno cadastrado com sucesso!',
+                        }).then(() => {
+                            history.back();
+                        });
+                    }
+                }).fail(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Cartão já cadastrado para um aluno!',
+                    });
+                });
+            }
+
+            function camposValidos(campos = []){
+                return campos.reduce((pre, curr) => {
+                    return pre && curr;
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

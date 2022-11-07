@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <div class="container py-5">
+        <h1>Cartões Lidos</h1>
+        <div class="alert alert-success" role="alert">
+            Apenas os 10 útlmos cartões lidos!
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover border">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">Data/Hora</th>
+                        <th class="text-center">Código</th>
+                        <th class="text-center">Cadastrado</th>
+                        <th class="text-center">Aluno</th>
+                        <th class="text-center">Matrícula</th>
+                        <th class="text-center">Curso</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="cartoes-lidos"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery 3.6.1 -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+    <script>
+        $(document).ready(() => {
+            const tabelaCartoesLidos = $('#cartoes-lidos');
+
+            atualizarLogCartoesLidos();
+            setInterval(atualizarLogCartoesLidos, 5000);
+
+            function atualizarLogCartoesLidos(){
+                $.ajax({
+                    url: "/log-cartoes-lidos/ultimos",
+                    success: cartoes => inserirNaTabela(cartoes)
+                });
+            }
+            
+            function inserirNaTabela(cartoes){
+                limparTabela();
+                cartoes.forEach(cartao => {
+                    tabelaCartoesLidos.append(`
+                        <tr>
+                            <th class="text-center">${cartao.dataHoraLeitura}</th>
+                            <th class="text-center">${cartao.codigo.toUpperCase()}</th>
+                            <th class="text-center">${cartao.cadastrado ? 'Sim' : 'Não'}</th>
+                            <th class="text-center">${cartao.cadastrado ? cartao.aluno.nome : '-'}</th>
+                            <th class="text-center">${cartao.cadastrado ? cartao.aluno.matricula : '-'}</th>
+                            <th class="text-center">${cartao.cadastrado ? cartao.aluno.curso.nome : '-'}</th>
+                            <th class="text-center">
+                                ${!cartao.cadastrado ? `
+                                    <a href="/app/alunos?codigo=${cartao.codigo}">
+                                        <i class="fa-solid fa-circle-plus text-success" role="button" title="Cadastrar"></i>
+                                    </a>
+                                ` : ''}
+                            </th>
+                        </tr>
+                    `);
+                });
+            }
+
+            function limparTabela(){
+                tabelaCartoesLidos.empty();
+            }
+        });
+    </script>
+</body>
+
+</html>
